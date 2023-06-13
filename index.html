@@ -1,8 +1,99 @@
 <!DOCTYPE html>
 <head>
-    <title>Talk-online|By Vss</title>
+    <title>Talk-online | By Vss</title>
     <meta charset="utf-8">
+    <!--<script src="./Bmob-2.4.14.min.js">var Bmob = require('./src/lib/app.js');Bmob.initialize("926664d42455123f", "1233333333333333");Bmob.debug(true);</script>-->
+    <style>
+        /* 设置全局字体和背景颜色 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+  
+        /* 设置聊天框样式 */
+        #chat-box {
+            width: 80%;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+  
+        /* 设置表单样式 */
+        #message-form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+  
+        #message-input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+  
+        #message-input:focus {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+  
+        button[type="submit"] {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+  
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+  
+        /* 设置输出框样式 */
+        #output {
+            margin-top: 10px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+  
+        #output br {
+            display: block;
+            margin-bottom: 10px;
+            content: "";
+        }
+    </style>
 </head>
 <body>
-    
+    <div id="chat-box">
+        <form id="message-form">
+            <input type="text" id="message-input" />
+            <button type="submit">发送</button>
+        </form>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function gebi(id){return document.getElementById(id);}
+
+        var output=gebi("output");
+        var s_output=[];
+
+        gebi("message-form").addEventListener("submit",function(event){
+            event.preventDefault();
+            var messageInput=gebi("message-input").value;
+            console.log(messageInput);
+            s_output.unshift(messageInput);
+            output.innerHTML = s_output.toString().split(',').join('<br>');
+        });
+
+    </script>
 </body>
