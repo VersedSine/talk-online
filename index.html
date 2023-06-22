@@ -92,44 +92,28 @@
         function lot2(n){return n<10?'0'+n:n;}
 
         var channel=window.location.search.substr(1);console.log(`channel:${channel}`);
-        var userName=channel.substr(-1)=='!'?"_testUser":window.prompt("Name?");
+        var debug=channel.substr(-1)=='!'?true:false;
+        var userName=debug?"_testUser":window.prompt("Name?");
         while(userName=="") userName = window.prompt("Name?\nName must NOT be empty");
 
-
+        const queryCommunicate = Bmob.Query("communicate");
         var output=gebi("output");
         var s_output=[];
 
-        function showmessages(){
-            output.innerHTML = s_output.toString().split(',').join("<br>");
-        }
-
-        const queryCommunicate = Bmob.Query("communicate");
-        /*var countnum;    //起始信息编号
-        queryCommunicate.count().then(res => {
-            countnum = res;
-        });
-        setInterval(function(){
-            var nowCountNum;;
-            queryCommunicate.count().then(res => {
-                nowCountNum = res;
-            });
-
-            queryCommunicate.find().then(res => {
-                countnum = res;
-            });
-        },1000);*/
-
+        function showmessages(){output.innerHTML = s_output.toString().split(',').join("<br>");}
+        function addMessage(message){s_output.unshift(message);}
         function print(message){
             var d=new Date();
-            s_output.unshift(`<font color="green">${userName}&nbsp;&nbsp;&nbsp;${lot2(d.getHours())}:${lot2(d.getMinutes())}:${lot2(d.getSeconds())}</font><br>`+message);
-            showmessages();
+            //addMessage(`<font color="green">${userName}&nbsp;&nbsp;&nbsp;</font>${lot2(d.getHours())}:${lot2(d.getMinutes())}:${lot2(d.getSeconds())}<br>`+message);
+            //showmessages();
             
+            queryCommunicate.set("channel",channel);
             queryCommunicate.set("userName",userName);
             queryCommunicate.set("message",message);
             queryCommunicate.save().then(res => {
-                console.log(res);
+                //console.log(res);
             }).catch(err => {
-                console.log(err);
+                //console.log(err);
             })
         }
         gebi("message-form").addEventListener("submit",function(event){
@@ -139,9 +123,27 @@
             console.log(messageInput);
             print(messageInput);
         });
+        
         function dice(){
             print(`<img style="height: 100px" src="./img/dice_${Number(Math.floor(Math.random()*6)+1)}.gif">`);
         }
 
+        //显示数据库内的最近100条信息
+        var nowMessageNum=0;
+        setInterval(function(){
+            queryCommunicate.find().then(res => {
+                console.log(res);
+                console.log(String(res[1].createdAt.split(' ')[1]));
+
+                var pastMessageNum = Object.keys(res).length;
+                for(;nowMessageNum<pastMessageNum;nowMessageNum++)
+                    addMessage(
+                        `<font color="${res[nowMessageNum].userName!=userName?"blue":"green"}">${res[nowMessageNum].userName}&nbsp;&nbsp;&nbsp;</font>`+    //用户名
+                        String(res[nowMessageNum].createdAt).split(" ")[1]+"<br>"+    //时间
+                        res[nowMessageNum].message    //正文
+                    );
+                showmessages();
+            });
+        },1000);
     </script>
 </body>
