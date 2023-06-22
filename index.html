@@ -73,6 +73,11 @@
         .img_dice{
             height: 25px;
         }
+
+        .avatar{
+            height: 44px;
+            width: 44px;
+        }
     </style>
     <script src="./Bmob-2.4.14.min.js">var Bmob = require('./src/lib/app.js');</script>
     <script>Bmob.initialize("a4bf436ef84c46a0", "1adsfuwieriaudfm");Bmob.debug(true);</script>
@@ -90,6 +95,7 @@
     <script>
         function gebi(id){return document.getElementById(id);}
         function lot2(n){return n<10?'0'+n:n;}
+        function lengthTo6ByHash(s){var sum = new Number();for(var i=0;i<s.length;i++) sum = sum*10+s[i].charCodeAt()^0b101010;var rtn = new String();for(var i=0;i<6;i++) rtn += String(sum%16<10?String(sum%16):String.fromCharCode(sum%16+97-10)),sum >>= 4,console.log(rtn,sum);return rtn;}
 
         var channel=window.location.search.substr(1);console.log(`channel:${channel}`);
         var debug=channel.substr(-1)=='!'?true:false;
@@ -138,8 +144,9 @@
                 var pastMessageNum = Object.keys(res).length;
                 for(;nowMessageNum<pastMessageNum;nowMessageNum++)
                     addMessage(
+                        `<img class="avatar" src="https://ui-avatars.com/api/${res[nowMessageNum].userName}/128/${lengthTo6ByHash(res[nowMessageNum].userName)}/ffffff">&nbsp;&nbsp;&nbsp;`+    //头像
                         `<font color="${res[nowMessageNum].userName!=userName?"blue":"green"}">${res[nowMessageNum].userName}&nbsp;&nbsp;&nbsp;</font>`+    //用户名
-                        String(res[nowMessageNum].createdAt).split(" ")[1]+"<br>"+    //时间
+                        String(res[nowMessageNum].createdAt).split(" ")[1]+"<br><br>"+    //时间
                         res[nowMessageNum].message    //正文
                     );
                 showmessages();
