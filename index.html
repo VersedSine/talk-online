@@ -95,12 +95,12 @@
     <script>
         function gebi(id){return document.getElementById(id);}
         function lot2(n){return n<10?'0'+n:n;}
-        function lengthTo6ByHash(s){var sum = new Number();for(var i=0;i<s.length;i++) sum = sum*10+s[i].charCodeAt()^0b101010;var rtn = new String();for(var i=0;i<6;i++) rtn += String(sum%16<10?String(sum%16):String.fromCharCode(sum%16+97-10)),sum >>= 4,console.log(rtn,sum);return rtn;}
+        function lengthTo6ByHash(s){var sum = new Number();for(var i=0;i<s.length;i++) sum = sum*10+s[i].charCodeAt()^0b101010;var rtn = new String();for(var i=0;i<6;i++) rtn += String(sum%16<10?String(sum%16):String.fromCharCode(sum%16+97-10)),sum >>= 4;return rtn;}
 
         var channel=window.location.search.substr(1);console.log(`channel:${channel}`);
         var debug=channel.substr(-1)=='!'?true:false;
-        var userName=debug?"_testUser":window.prompt("Name?");
-        while(userName=="") userName = window.prompt("Name?\nName must NOT be empty");
+        var userName=debug?"_testUser":window.prompt("用户名");
+        while(userName=="") userName = window.prompt("用户名\n用户名不为空");
 
         const queryCommunicate = Bmob.Query("communicate");
         var output=gebi("output");
@@ -134,10 +134,26 @@
             print(`<img style="height: 100px" src="./img/dice_${Number(Math.floor(Math.random()*6)+1)}.gif">`);
         }
 
+        //检测用户是否挂机
+        var userOffline=false;
+        var offlineSeconds=0;
+        setInterval(function(){
+            offlineSeconds++;
+            console.log(`offlineScconds:${offlineSeconds}`)
+            if(offlineSeconds>=30){
+                userOffline = true;
+                alert("您在线吗？\n\n服务器访问量有限，望理解 :)");
+                offlineSeconds = 0;
+                userOffline = false;
+            }
+        },1000);
+        gebi("chat-box").onmousemove = function(){offlineSeconds = 0;}
+        gebi("message-input").onkeydown = function(){offlineSeconds = 0;}
+
         //显示数据库内的最近100条信息
         var nowMessageNum=0;
         setInterval(function(){
-            queryCommunicate.find().then(res => {
+            if(!userOffline) queryCommunicate.find().then(res => {
                 console.log(res);
                 console.log(String(res[1].createdAt.split(' ')[1]));
 
