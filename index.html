@@ -96,7 +96,7 @@
         function gebi(id){return document.getElementById(id);}
         function lot2(n){return n<10?'0'+n:n;}
         function lengthTo6ByHash(s){var sum = new Number();for(var i=0;i<s.length;i++) sum = sum*10+s[i].charCodeAt()^0b101010;var rtn = new String();for(var i=0;i<6;i++) rtn += String(sum%16<10?String(sum%16):String.fromCharCode(sum%16+97-10)),sum >>= 4;return rtn;}
-
+        function max(a,b){return a>b?a:b;}
         var channel=window.location.search.substr(1);console.log(`channel:${channel}`);
         var debug=channel.substr(-1)=='!'?true:false;
         var userName=debug?"_testUser":window.prompt("用户名");
@@ -105,6 +105,8 @@
         const queryCommunicate = Bmob.Query("communicate");
         var output=gebi("output");
         var s_output=[];
+
+        //queryCommunicate.limit(1000);
 
         function showmessages(){output.innerHTML = s_output.toString().split(',').join("<br>");}
         function addMessage(message){s_output.unshift(message);}
@@ -151,19 +153,36 @@
         gebi("message-input").onkeydown = function(){offlineSeconds = 0;}
 
         //显示数据库内的最近100条信息
-        var nowMessageNum=0;
+        var nowMessageNum=0,pastMessageNum=0;
+        var Messages=[];
         setInterval(function(){
-            if(!userOffline) queryCommunicate.find().then(res => {
-                console.log(res);
-                console.log(String(res[1].createdAt.split(' ')[1]));
+            if(userOffline) return;
+            var countPromise=queryCommunicate.count(),
+                findPromose=queryCommunicate.find();
+            Promise.all([countPromise,findPromose]).then(res=>{    //res:[0:CountRes,1:findRes]
+                //count().then
+                console.log(`messageNum:${res[0]}`);
+                if(Messages) queryCommunicate.skip(max(0,res[0]-100));
 
-                var pastMessageNum = Object.keys(res).length;
+                //find().then
+                console.log(res[1]);
+                var tmp=[];
+                res[1].forEach(e=>{
+                    if(!Messages.some(i=>i.objectId===e.objectId)){
+                        tmp.push(e);
+                        //console.log(e);
+                    }
+                });
+                console.log(tmp);
+                tmp.forEach(e=>{Messages.push(e);pastMessageNum++;})
+                //console.log(String(res[1].createdAt.split(' ')[1]));
+
                 for(;nowMessageNum<pastMessageNum;nowMessageNum++)
                     addMessage(
-                        `<img class="avatar" src="https://ui-avatars.com/api/${res[nowMessageNum].userName}/128/${lengthTo6ByHash(res[nowMessageNum].userName)}/ffffff">&nbsp;&nbsp;&nbsp;`+    //头像
-                        `<font color="${res[nowMessageNum].userName!=userName?"blue":"green"}">${res[nowMessageNum].userName}&nbsp;&nbsp;&nbsp;</font>`+    //用户名
-                        String(res[nowMessageNum].createdAt).split(" ")[1]+"<br><br>"+    //时间
-                        res[nowMessageNum].message    //正文
+                        `<img class="avatar" src="https://ui-avatars.com/api/${Messages[nowMessageNum].userName}/128/${lengthTo6ByHash(Messages[nowMessageNum].userName)}/ffffff">&nbsp;&nbsp;&nbsp;`+    //头像
+                        `<font color="${Messages[nowMessageNum].userName!=userName?"blue":"green"}">${Messages[nowMessageNum].userName}&nbsp;&nbsp;&nbsp;</font>`+    //用户名
+                        String(Messages[nowMessageNum].createdAt).split(" ")[1]+"<br><br>"+    //时间
+                        Messages[nowMessageNum].message    //正文
                     );
                 showmessages();
             });
