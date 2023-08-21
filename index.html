@@ -100,7 +100,7 @@
         var channel=window.location.search.substr(1);console.log(`channel:${channel}`);
         var debug=channel.substr(-1)=='!'?true:false;
         var userName=debug?"_testUser":window.prompt("用户名");
-        while(userName==""||userName.search("hjr")) userName = window.prompt("用户名违规，清重新输入用户名");
+        while(userName==""||!userName.search("hjr")) userName = window.prompt("用户名违规，清重新输入用户名");
 
         const queryCommunicate = Bmob.Query("communicate");
         var output=gebi("output");
